@@ -1,0 +1,1 @@
+pub const FIXED_DT: f32 = 1.0 / 120.0;

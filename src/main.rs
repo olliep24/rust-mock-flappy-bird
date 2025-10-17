@@ -1,37 +1,51 @@
 #![forbid(unsafe_code)]
 
+mod game;
+mod config;
+
+use std::time::Instant;
+
 use pixels::{Pixels, SurfaceTexture, Error};
 use winit::{
     dpi::LogicalSize, event::{Event, WindowEvent}, event_loop::{ControlFlow, EventLoop}, window::WindowBuilder
 };
+use game::Game;
+use config::FIXED_DT;
 
-const WIDTH: u32 = 400;
-const HEIGHT: u32 = 200;
+const WIDTH: u32 = 1200;
+const HEIGHT: u32 = 600;
 
 fn main() -> Result<(), Error> {
     let event_loop = EventLoop::new().unwrap();
 
     let window = {
         let size = LogicalSize::new(WIDTH as f64, HEIGHT as f64);
-        let scaled_size = LogicalSize::new(WIDTH as f64 * 3.0, HEIGHT as f64 * 3.0);
         WindowBuilder::new()
-            .with_title("Conway's Game of Life")
-            .with_inner_size(scaled_size)
-            .with_min_inner_size(size)
+            .with_title("Flappy")
+            .with_inner_size(size)
             .with_resizable(false)
             .build(&event_loop)
             .unwrap()
     };
 
+    // Rendering and game state.
     let mut pixels: Option<Pixels> = None;
+    let mut game: Game = Game::new();
 
-    // ControlFlow::Poll continuously runs the event loop, even if the OS hasn't
-    // dispatched any events. This is ideal for games and similar applications.
+    // Clock set up
+    let mut last: Instant = Instant::now();
+    let mut accum: f32 = 0.0;
+
     event_loop.set_control_flow(ControlFlow::Poll);
 
     let res = event_loop.run(|event, elwt| {
         match event {
             Event::Resumed => {
+                // Have to create pixels inside the closure because it references window
+                // If it was created outside the loop and it reference window there, it would be referencing
+                // the memory where window was in main's stack (but it got moved to this closure).
+
+                // This is the place to do it because Resumed marks the start of the window.
                 if pixels.is_none() {
                     let size = window.inner_size();
                     let surface = SurfaceTexture::new(size.width, size.height, &window);
@@ -53,6 +67,18 @@ fn main() -> Result<(), Error> {
                 // You only need to call this if you've determined that you need to redraw in
                 // applications which do not always need to. Applications that redraw continuously
                 // can render here instead.
+                // time
+                let now = Instant::now();
+                let mut dt = (now - last).as_secs_f32();
+                last = now;
+                if dt > 0.25 { dt = 0.25; }
+                accum += dt;
+
+                while accum >= FIXED_DT {
+                    game.update(FIXED_DT);
+                    accum -= FIXED_DT;
+                }
+
                 window.request_redraw();
             },
             Event::WindowEvent {
@@ -66,11 +92,7 @@ fn main() -> Result<(), Error> {
                 // the program to gracefully handle redraws requested by the OS.
                 if let Some(p) = pixels.as_mut() {
                     let frame = p.frame_mut();
-                    frame[0] = 0xFF;
-                    frame[600] = 0xAA;
-                    frame[601] = 0xAA;
-                    frame[602] = 0xAA;
-                    frame[603] = 0xAA;
+                    game.draw(frame);
                     let _ = p.render();
                 }
             },
