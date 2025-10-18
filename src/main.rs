@@ -10,10 +10,7 @@ use winit::{
     dpi::LogicalSize, event::{Event, WindowEvent}, event_loop::{ControlFlow, EventLoop}, window::WindowBuilder
 };
 use game::Game;
-use config::FIXED_DT;
-
-const WIDTH: u32 = 1200;
-const HEIGHT: u32 = 600;
+use config::{WIDTH, HEIGHT, FIXED_DT};
 
 fn main() -> Result<(), Error> {
     let event_loop = EventLoop::new().unwrap();
@@ -49,7 +46,7 @@ fn main() -> Result<(), Error> {
                 if pixels.is_none() {
                     let size = window.inner_size();
                     let surface = SurfaceTexture::new(size.width, size.height, &window);
-                    pixels = Some(Pixels::new(WIDTH, HEIGHT, surface).unwrap());
+                    pixels = Some(Pixels::new(WIDTH as u32, HEIGHT as u32, surface).unwrap());
                 }
             }
             Event::WindowEvent {
@@ -92,6 +89,10 @@ fn main() -> Result<(), Error> {
                 // the program to gracefully handle redraws requested by the OS.
                 if let Some(p) = pixels.as_mut() {
                     let frame = p.frame_mut();
+
+                    // Clear the frame from the previous drawing:
+                    frame.fill(0);
+                    
                     game.draw(frame);
                     let _ = p.render();
                 }
