@@ -1,15 +1,17 @@
 mod bird;
 mod pipe;
 mod vector2;
+mod ui;
 
 use rand::{SeedableRng};
 use rand_pcg::Pcg32;
 
 use crate::config::{PIPE_SPACING, PIPE_WIDTH, SEED, WIDTH};
+use crate::game::ui::score::Score;
 use self::{bird::Bird, pipe::Pipe};
 
 pub struct Game {
-    _score: u32,
+    score: Score,
     bird: Bird,
     pipes: Vec<Pipe>,
     rng: Pcg32,
@@ -23,7 +25,7 @@ impl Game {
         pipes.push(Pipe::new(&mut rng));
 
         Self { 
-            _score: 0,
+            score: Score::new(),
             bird: Bird::new(),
             pipes,
             rng,
@@ -45,6 +47,9 @@ impl Game {
         for pipe in &self.pipes {
             pipe.draw(frame);
         }
+
+        // Draw score last so that it draws over everything.
+        self.score.draw(frame);
     }
 
     pub fn space_bar_hit(&mut self) -> () {
