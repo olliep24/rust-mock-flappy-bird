@@ -7,7 +7,7 @@ use std::time::Instant;
 
 use pixels::{Pixels, SurfaceTexture, Error};
 use winit::{
-    dpi::LogicalSize, event::{Event, WindowEvent}, event_loop::{ControlFlow, EventLoop}, window::WindowBuilder
+    dpi::LogicalSize, event::{ElementState, Event, KeyEvent, WindowEvent}, event_loop::{ControlFlow, EventLoop}, keyboard::{Key, NamedKey}, window::WindowBuilder
 };
 use game::Game;
 use config::{WIDTH, HEIGHT, FIXED_DT};
@@ -92,11 +92,22 @@ fn main() -> Result<(), Error> {
 
                     // Clear the frame from the previous drawing:
                     frame.fill(0);
-                    
+
                     game.draw(frame);
                     let _ = p.render();
                 }
             },
+            Event::WindowEvent {
+                event: WindowEvent::KeyboardInput {
+                    event: KeyEvent { logical_key: Key::Named(NamedKey::Space), state, repeat, .. },
+                    ..
+                },
+                ..
+            } => {
+                if state == ElementState::Pressed && !repeat {
+                    game.space_bar_hit();
+                }
+            }
             _ => ()
         }
     });
