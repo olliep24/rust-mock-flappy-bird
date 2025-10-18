@@ -1,6 +1,6 @@
 use std::ops::{Add, Mul};
 
-use crate::config::{HEIGHT, PIPE_A_COLOR, PIPE_B_COLOR, PIPE_G_COLOR, PIPE_R_COLOR, PIPE_SPEED, WIDTH};
+use crate::config::{HEIGHT, PIPE_A_COLOR, PIPE_B_COLOR, PIPE_G_COLOR, PIPE_R_COLOR, PIPE_SPEED, PIPE_WIDTH, WIDTH};
 
 pub struct Game {
     _score: u32,
@@ -75,21 +75,27 @@ impl Pipe {
 
     fn draw(&self, frame: &mut [u8]) -> () {
         // clamp or early-return if offscreen
-        if self.position.x < 0.0 || self.position.x >= WIDTH as f32 { 
-            return; 
-        }
+        // if self.position.x < 0.0 || self.position.x >= WIDTH as f32 { 
+        //     return; 
+        // }
+        let stride = WIDTH as usize * 4;
+        let x_position = self.position.x as i32;
+        
+        for x in x_position..x_position + PIPE_WIDTH as i32 {
+            // Don't draw out of bounds
+            if x < 0 || x * 4 >= stride as i32 {
+                continue;
+            }
 
-        let x = self.position.x as usize;
-        let stride = WIDTH * 4;
+            for y in 0..HEIGHT as usize {
+                let idx = y * stride + x as usize * 4;
+                if idx + 3 >= frame.len() { break; } // safety
 
-        for y in 0..HEIGHT {
-            let idx = y * stride + x * 4;
-            if idx + 3 >= frame.len() { break; } // safety
-
-            frame[idx + 0] = PIPE_R_COLOR;
-            frame[idx + 1] = PIPE_G_COLOR;
-            frame[idx + 2] = PIPE_B_COLOR;
-            frame[idx + 3] = PIPE_A_COLOR;
+                frame[idx + 0] = PIPE_R_COLOR;
+                frame[idx + 1] = PIPE_G_COLOR;
+                frame[idx + 2] = PIPE_B_COLOR;
+                frame[idx + 3] = PIPE_A_COLOR;
+            }
         }
     }
 }
