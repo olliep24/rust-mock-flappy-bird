@@ -26,7 +26,7 @@ pub const BIRD_START_POSITION_Y: u32 = 200;
 pub const BIRD_FLY_SPEED: f32 = 200.0;
 pub const BIRD_GRAVITY_ACCELERATION_SCALE: f32 = 2.0;
 
-pub const BIRD_LENGTH: u32 = 30;
+pub const BIRD_HEIGHT: u32 = 30;
 pub const BIRD_WIDTH: u32 = 30;
 
 pub const BIRD_R_COLOR: u8 = 0xF0;
