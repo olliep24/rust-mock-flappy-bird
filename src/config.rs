@@ -1,13 +1,19 @@
 // Clock
 pub const FIXED_DT: f32 = 1.0 / 120.0;
 
-// Game size
+// Window size
 pub const WIDTH: u32 = 1200;
 pub const HEIGHT: u32 = 600;
+
+// Game constants
+pub const SEED: u64 = 1;
 
 // Pipe constants
 pub const PIPE_SPEED: f32 = 60.0;
 pub const PIPE_WIDTH: u32 = 30;
+pub const PIPE_SPACING: u32 = 200;
+pub const PIPE_GAP_BOUND: u32 = 50;
+pub const PIPE_GAP_SIZE: u32 = 200;
 
 pub const PIPE_R_COLOR: u8 = 0xFF;
 pub const PIPE_G_COLOR: u8 = 0xFF;
