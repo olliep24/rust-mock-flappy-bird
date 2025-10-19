@@ -57,7 +57,6 @@ fn main() -> Result<(), Error> {
                 event: WindowEvent::CloseRequested,
                 ..
             } => {
-                println!("The close button was pressed; stopping");
                 elwt.exit();
             }
             Event::AboutToWait => {

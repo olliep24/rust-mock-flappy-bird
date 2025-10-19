@@ -50,9 +50,10 @@ impl Game {
         self.rng = rand::rng();
         self.score = Score::new();
         self.bird = Bird::new();
-        let mut pipes = Vec::new();
+        
+        self.pipes = Vec::new();
         // Create first pipe to start creation loop.
-        pipes.push(Pipe::new(&mut self.rng));
+        self.pipes.push(Pipe::new(&mut self.rng));
     }
 
     pub fn update(&mut self, dt: f32) -> () {
