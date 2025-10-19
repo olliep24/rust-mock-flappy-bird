@@ -9,11 +9,11 @@ pub const HEIGHT: u32 = 600;
 pub const SEED: u64 = 2;
 
 // Pipe constants
-pub const PIPE_SPEED: f32 = 70.0;
+pub const PIPE_SPEED: f32 = 80.0;
 pub const PIPE_WIDTH: u32 = 30;
 pub const PIPE_SPACING: u32 = 200;
-pub const PIPE_GAP_BOUND: u32 = 50;
-pub const PIPE_GAP_SIZE: u32 = 200;
+pub const PIPE_GAP_BOUND: u32 = 30;
+pub const PIPE_GAP_SIZE: u32 = 125;
 
 pub const PIPE_R_COLOR: u8 = 0xFF;
 pub const PIPE_G_COLOR: u8 = 0xFF;

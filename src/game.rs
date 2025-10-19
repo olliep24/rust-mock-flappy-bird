@@ -47,6 +47,8 @@ impl Game {
             println!("You finished with score: {}", self.score.score);
             std::process::exit(0);
         }
+
+        self.clean_up_past_pipes();
     }
 
     pub fn draw(&self, frame: &mut [u8]) -> () {
@@ -101,7 +103,16 @@ impl Game {
         if self.bird.position.y < 0.0 || self.bird.position.y > HEIGHT as f32 {
             return true;
         }
-        
+
         false
+    }
+
+    fn clean_up_past_pipes(&mut self) -> () {
+        let first_pipe = self.pipes.first().unwrap();
+
+        if (first_pipe.position.x + PIPE_WIDTH as f32) < 0.0 {
+            self.pipes.remove(0);
+            println!("Removed pipe");
+        }
     }
 }
