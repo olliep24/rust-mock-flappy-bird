@@ -7,7 +7,7 @@ mod collision_box;
 use rand::{SeedableRng};
 use rand_pcg::Pcg32;
 
-use crate::config::{PIPE_SPACING, PIPE_WIDTH, SEED, WIDTH};
+use crate::config::{HEIGHT, PIPE_SPACING, PIPE_WIDTH, SEED, WIDTH};
 use crate::game::ui::score::Score;
 use self::{bird::Bird, pipe::Pipe};
 
@@ -90,12 +90,18 @@ impl Game {
 
     /// Returns whether the bird should die.
     /// The bird dies if it is in contact with any of the pipes
+    /// or if it is in contact with the ceiling or floor.
     fn check_if_bird_dies(&self) -> bool {
         for pipe in &self.pipes {
             if self.bird.collides_with_pipe(pipe) {
                 return true;
             }
         }
+
+        if self.bird.position.y < 0.0 || self.bird.position.y > HEIGHT as f32 {
+            return true;
+        }
+        
         false
     }
 }

@@ -6,7 +6,7 @@ pub const WIDTH: u32 = 900;
 pub const HEIGHT: u32 = 600;
 
 // Game constants
-pub const SEED: u64 = 1;
+pub const SEED: u64 = 2;
 
 // Pipe constants
 pub const PIPE_SPEED: f32 = 70.0;

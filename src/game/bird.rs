@@ -6,7 +6,7 @@ use crate::game::vector2::Vector2;
 /// Struct for the pipe.
 /// A bird's position represents the top left corner of them.
 pub struct Bird {
-    position: Vector2,
+    pub position: Vector2,
     velocity: Vector2,
     collision_box: CollisionBox
 }
