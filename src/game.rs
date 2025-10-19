@@ -90,12 +90,11 @@ impl Game {
 
     pub fn y_key_hit(&mut self) -> () {
         match self.game_state {
-            GameState::MainMenu => {
+            GameState::Playing => return,
+            _ => {
                 self.refresh_state();
                 self.game_state = GameState::Playing;
             }
-            GameState::Playing => return,
-            GameState::Dead => self.game_state = GameState::Playing,
         }
     }
 
