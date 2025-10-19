@@ -39,6 +39,8 @@ impl Game {
         for pipe in &mut self.pipes {
             pipe.update(dt);
         }
+
+        self.check_if_bird_passed_pipe();
     }
 
     pub fn draw(&self, frame: &mut [u8]) -> () {
@@ -61,6 +63,22 @@ impl Game {
 
         if last_pipe.position.x as u32 + PIPE_WIDTH + PIPE_SPACING < WIDTH {
             self.pipes.push(Pipe::new(&mut self.rng));
+        }
+    }
+
+    fn check_if_bird_passed_pipe(&mut self) -> () {
+        for pipe in &mut self.pipes {
+            if pipe.passed {
+                continue;
+            }
+
+            if self.bird.is_passed_pipe(pipe) {
+                pipe.passed = true;
+                self.score.increase_score();
+
+                // Ok to break because bird should only pass one at a time.
+                break;
+            }
         }
     }
 }

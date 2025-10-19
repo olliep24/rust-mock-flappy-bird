@@ -1,4 +1,5 @@
-use crate::config::{BIRD_FLY_SPEED, BIRD_GRAVITY_ACCELERATION_SCALE, BIRD_HEIGHT, BIRD_R_COLOR, BIRD_A_COLOR, BIRD_B_COLOR, BIRD_G_COLOR, BIRD_START_POSITION_X, BIRD_START_POSITION_Y, BIRD_WIDTH, WIDTH};
+use crate::config::{BIRD_FLY_SPEED, BIRD_GRAVITY_ACCELERATION_SCALE, BIRD_HEIGHT, BIRD_R_COLOR, BIRD_A_COLOR, BIRD_B_COLOR, BIRD_G_COLOR, BIRD_START_POSITION_X, BIRD_START_POSITION_Y, BIRD_WIDTH, WIDTH, PIPE_WIDTH};
+use crate::game::pipe::Pipe;
 use crate::game::vector2::Vector2;
 
 /// Struct for the pipe.
@@ -43,5 +44,9 @@ impl Bird {
                 frame[idx + 3] = BIRD_A_COLOR;
             }
         }
+    }
+
+    pub fn is_passed_pipe(&self, pipe: &Pipe) -> bool {
+        self.position.x > pipe.position.x + PIPE_WIDTH as f32
     }
 }

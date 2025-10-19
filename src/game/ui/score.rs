@@ -16,17 +16,28 @@ impl Score {
 
     pub fn draw(&self, frame: &mut [u8]) -> () {
         let mut score = self.score;
+        let offset_scale = FONT_PIXEL_SIZE_SCREEN_PIXELS * FONT_WIDTH_SIZE_SCREEN_PIXELS;
 
-        // Still want to render the score if it is zero.
+        // Still want to render zero
         if score == 0 {
-            draw_digit(frame, score, SCORE_START_OFFSET, SCORE_START_OFFSET).unwrap();
+            draw_digit(frame, 0, SCORE_START_OFFSET, SCORE_START_OFFSET).unwrap();
             return;
         }
 
-        while score > 0 {
-            let digit = score % 10;
-            draw_digit(frame, digit, SCORE_START_OFFSET, SCORE_START_OFFSET).unwrap();
-            score /= 10;
+        // Compute divisor to get most significant digit first
+        let mut div = 1;
+        while score / div >= 10 {
+            div *= 10;
+        }
+
+        let mut x_offset = SCORE_START_OFFSET;
+
+        while div > 0 {
+            let digit = score / div;
+            draw_digit(frame, digit, x_offset, SCORE_START_OFFSET).unwrap();
+            score %= div;
+            div /= 10;
+            x_offset += offset_scale;
         }
     }
 }

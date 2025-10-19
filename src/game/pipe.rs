@@ -9,6 +9,7 @@ pub struct Pipe {
     pub position: Vector2,
     velocity: Vector2,
     y_gap_location: u32,
+    pub passed: bool,
 }
 
 impl Pipe {
@@ -18,6 +19,7 @@ impl Pipe {
             position: Vector2::new(WIDTH as f32, 0.0),
             velocity: Vector2::left() * PIPE_SPEED,
             y_gap_location: rng.random_range(PIPE_GAP_BOUND..HEIGHT - PIPE_GAP_BOUND - PIPE_GAP_SIZE),
+            passed: false,
         }
     }
 
