@@ -2,6 +2,7 @@ mod bird;
 mod pipe;
 mod vector2;
 mod ui;
+mod collision_box;
 
 use rand::{SeedableRng};
 use rand_pcg::Pcg32;
@@ -41,6 +42,11 @@ impl Game {
         }
 
         self.check_if_bird_passed_pipe();
+
+        if self.check_if_bird_dies() {
+            println!("You finished with score: {}", self.score.score);
+            std::process::exit(0);
+        }
     }
 
     pub fn draw(&self, frame: &mut [u8]) -> () {
@@ -80,5 +86,16 @@ impl Game {
                 break;
             }
         }
+    }
+
+    /// Returns whether the bird should die.
+    /// The bird dies if it is in contact with any of the pipes
+    fn check_if_bird_dies(&self) -> bool {
+        for pipe in &self.pipes {
+            if self.bird.collides_with_pipe(pipe) {
+                return true;
+            }
+        }
+        false
     }
 }

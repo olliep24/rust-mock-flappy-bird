@@ -2,7 +2,7 @@ use crate::config::{DIGITS, FONT_HEIGHT_SCREEN_PIXELS, FONT_PIXEL_SIZE_SCREEN_PI
 use std::io::{Error, ErrorKind::InvalidInput};
 
 pub struct Score {
-    score: u32,
+    pub score: u32,
 }
 
 impl Score {

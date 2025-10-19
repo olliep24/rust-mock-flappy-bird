@@ -1,6 +1,7 @@
 use crate::config::{WIDTH, HEIGHT, PIPE_WIDTH, PIPE_SPEED, PIPE_A_COLOR, PIPE_B_COLOR, PIPE_G_COLOR, PIPE_R_COLOR, PIPE_GAP_SIZE, PIPE_GAP_BOUND};
 use rand::Rng;
 use rand_pcg::Pcg32;
+use crate::game::collision_box::CollisionBox;
 use crate::game::vector2::Vector2;
 
 /// Struct for the pipe.
@@ -10,21 +11,50 @@ pub struct Pipe {
     velocity: Vector2,
     y_gap_location: u32,
     pub passed: bool,
+
+    pub upper_collision_box: CollisionBox,
+    pub lower_collision_box: CollisionBox,
 }
 
 impl Pipe {
     /// On creation, pipes are placed just past the right side of the screen.
     pub fn new(rng: &mut Pcg32) -> Self {
+        let y_gap_location = rng.random_range(PIPE_GAP_BOUND..HEIGHT - PIPE_GAP_BOUND - PIPE_GAP_SIZE);
+
+        let min_upper = Vector2::new(WIDTH as f32, 0.0);
+        let max_upper = Vector2::new(
+            (WIDTH + PIPE_WIDTH) as f32,
+            y_gap_location as f32
+        );
+
+        let min_lower = Vector2::new(
+            WIDTH as f32,
+            (y_gap_location + PIPE_GAP_SIZE) as f32
+        );
+        let max_lower = Vector2::new(
+            (WIDTH + PIPE_WIDTH) as f32,
+            HEIGHT as f32,
+        );
+
         Self {
-            position: Vector2::new(WIDTH as f32, 0.0),
+            position: min_upper,
             velocity: Vector2::left() * PIPE_SPEED,
-            y_gap_location: rng.random_range(PIPE_GAP_BOUND..HEIGHT - PIPE_GAP_BOUND - PIPE_GAP_SIZE),
+            y_gap_location,
             passed: false,
+            upper_collision_box: CollisionBox::new(min_upper, max_upper),
+            lower_collision_box: CollisionBox::new(min_lower, max_lower),
         }
     }
 
     pub fn update(&mut self, dt: f32) -> () {
         self.position = self.position + self.velocity * dt;
+
+        // Update collision boxes
+        self.upper_collision_box.min = self.upper_collision_box.min + self.velocity * dt;
+        self.upper_collision_box.max = self.upper_collision_box.max + self.velocity * dt;
+
+        self.lower_collision_box.min = self.lower_collision_box.min + self.velocity * dt;
+        self.lower_collision_box.max = self.lower_collision_box.max + self.velocity * dt;
     }
 
     pub fn draw(&self, frame: &mut [u8]) -> () {
@@ -38,7 +68,7 @@ impl Pipe {
             }
 
             for y in 0..HEIGHT as usize {
-                if y > self.y_gap_location as usize && y < self.y_gap_location as usize + PIPE_GAP_SIZE as usize {
+                if y > self.y_gap_location as usize && y < (self.y_gap_location + PIPE_GAP_SIZE) as usize {
                     continue;
                 }
 
