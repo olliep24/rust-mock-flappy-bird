@@ -1,16 +1,20 @@
 #![forbid(unsafe_code)]
 
-mod game;
 mod config;
+mod game;
 
 use std::time::Instant;
 
-use pixels::{Pixels, SurfaceTexture, Error};
-use winit::{
-    dpi::LogicalSize, event::{ElementState, Event, KeyEvent, WindowEvent}, event_loop::{ControlFlow, EventLoop}, keyboard::{Key, NamedKey}, window::WindowBuilder
-};
+use config::{FIXED_DT, HEIGHT, WIDTH};
 use game::Game;
-use config::{WIDTH, HEIGHT, FIXED_DT};
+use pixels::{Error, Pixels, SurfaceTexture};
+use winit::{
+    dpi::LogicalSize,
+    event::{ElementState, Event, KeyEvent, WindowEvent},
+    event_loop::{ControlFlow, EventLoop},
+    keyboard::{Key, NamedKey},
+    window::WindowBuilder,
+};
 
 fn main() -> Result<(), Error> {
     let event_loop = EventLoop::new().unwrap();
@@ -55,7 +59,7 @@ fn main() -> Result<(), Error> {
             } => {
                 println!("The close button was pressed; stopping");
                 elwt.exit();
-            },
+            }
             Event::AboutToWait => {
                 // Application update code.
 
@@ -68,7 +72,9 @@ fn main() -> Result<(), Error> {
                 let now = Instant::now();
                 let mut dt = (now - last).as_secs_f32();
                 last = now;
-                if dt > 0.25 { dt = 0.25; }
+                if dt > 0.25 {
+                    dt = 0.25;
+                }
                 accum += dt;
 
                 while accum >= FIXED_DT {
@@ -77,7 +83,7 @@ fn main() -> Result<(), Error> {
                 }
 
                 window.request_redraw();
-            },
+            }
             Event::WindowEvent {
                 event: WindowEvent::RedrawRequested,
                 ..
@@ -96,19 +102,48 @@ fn main() -> Result<(), Error> {
                     game.draw(frame);
                     let _ = p.render();
                 }
-            },
+            }
             Event::WindowEvent {
-                event: WindowEvent::KeyboardInput {
-                    event: KeyEvent { logical_key: Key::Named(NamedKey::Space), state, repeat, .. },
-                    ..
-                },
+                event:
+                    WindowEvent::KeyboardInput {
+                        event:
+                            KeyEvent {
+                                logical_key: Key::Named(NamedKey::Space),
+                                state,
+                                repeat,
+                                ..
+                            },
+                        ..
+                    },
                 ..
             } => {
                 if state == ElementState::Pressed && !repeat {
                     game.space_bar_hit();
                 }
             }
-            _ => ()
+            Event::WindowEvent {
+                event:
+                    WindowEvent::KeyboardInput {
+                        event:
+                            KeyEvent {
+                                logical_key: Key::Character(ch),
+                                state,
+                                repeat,
+                                ..
+                            },
+                        ..
+                    },
+                ..
+            } => {
+                if state == ElementState::Pressed && !repeat {
+                    match ch.as_str() {
+                        "y" | "Y" => game.y_key_hit(),
+                        "n" | "N" => game.n_key_hit(),
+                        _ => (),
+                    }
+                }
+            }
+            _ => (),
         }
     });
     res.map_err(|e| Error::UserDefined(Box::new(e)))

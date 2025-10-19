@@ -1,31 +1,44 @@
 mod bird;
-mod pipe;
-mod vector2;
-mod ui;
 mod collision_box;
+mod draw_utils;
+mod pipe;
+mod score;
+mod vector2;
 
-use rand::{SeedableRng};
-use rand_pcg::Pcg32;
-
-use crate::config::{HEIGHT, PIPE_SPACING, PIPE_WIDTH, SEED, WIDTH};
-use crate::game::ui::score::Score;
 use self::{bird::Bird, pipe::Pipe};
+use crate::config::{
+    FONT_HEIGHT_PIXEL_MAP_PIXELS, FONT_PIXEL_SIZE_SCREEN_PIXELS, FONT_START_OFFSET, HEIGHT,
+    PIPE_SPACING, PIPE_WIDTH, WIDTH,
+};
+use crate::game::draw_utils::draw_string;
+use rand::rngs::ThreadRng;
+use score::Score;
+use std::process::exit;
+
+#[derive(PartialEq)]
+enum GameState {
+    MainMenu,
+    Playing,
+    Dead,
+}
 
 pub struct Game {
+    game_state: GameState,
     score: Score,
     bird: Bird,
     pipes: Vec<Pipe>,
-    rng: Pcg32,
+    rng: ThreadRng,
 }
 
 impl Game {
     pub fn new() -> Self {
-        let mut rng = Pcg32::seed_from_u64(SEED);
+        let mut rng = rand::rng();
         let mut pipes = Vec::new();
         // Create first pipe to start creation loop.
         pipes.push(Pipe::new(&mut rng));
 
-        Self { 
+        Self {
+            game_state: GameState::MainMenu,
             score: Score::new(),
             bird: Bird::new(),
             pipes,
@@ -33,9 +46,22 @@ impl Game {
         }
     }
 
+    fn refresh_state(&mut self) -> () {
+        self.rng = rand::rng();
+        self.score = Score::new();
+        self.bird = Bird::new();
+        let mut pipes = Vec::new();
+        // Create first pipe to start creation loop.
+        pipes.push(Pipe::new(&mut self.rng));
+    }
+
     pub fn update(&mut self, dt: f32) -> () {
+        if self.game_state != GameState::Playing {
+            return;
+        }
+
         self.bird.update(dt);
-        
+
         self.check_for_new_pipe();
         for pipe in &mut self.pipes {
             pipe.update(dt);
@@ -43,27 +69,41 @@ impl Game {
 
         self.check_if_bird_passed_pipe();
 
-        if self.check_if_bird_dies() {
-            println!("You finished with score: {}", self.score.score);
-            std::process::exit(0);
-        }
-
         self.clean_up_past_pipes();
+
+        if self.check_if_bird_dies() {
+            self.game_state = GameState::Dead;
+        }
     }
 
     pub fn draw(&self, frame: &mut [u8]) -> () {
-        self.bird.draw(frame);
-
-        for pipe in &self.pipes {
-            pipe.draw(frame);
+        match self.game_state {
+            GameState::MainMenu => self.draw_main_menu(frame),
+            GameState::Playing => self.draw_playing(frame),
+            GameState::Dead => self.draw_dead(frame),
         }
-
-        // Draw score last so that it draws over everything.
-        self.score.draw(frame);
     }
 
     pub fn space_bar_hit(&mut self) -> () {
         self.bird.fly();
+    }
+
+    pub fn y_key_hit(&mut self) -> () {
+        match self.game_state {
+            GameState::MainMenu => {
+                self.refresh_state();
+                self.game_state = GameState::Playing;
+            }
+            GameState::Playing => return,
+            GameState::Dead => self.game_state = GameState::Playing,
+        }
+    }
+
+    pub fn n_key_hit(&mut self) -> () {
+        match self.game_state {
+            GameState::Playing => return,
+            _ => exit(0),
+        }
     }
 
     fn check_for_new_pipe(&mut self) -> () {
@@ -100,6 +140,7 @@ impl Game {
             }
         }
 
+        // Purposely not adding BIRD_HEIGHT for some leeway.
         if self.bird.position.y < 0.0 || self.bird.position.y > HEIGHT as f32 {
             return true;
         }
@@ -107,12 +148,45 @@ impl Game {
         false
     }
 
+    /// Removes pipes that aren't in the screen anymore.
     fn clean_up_past_pipes(&mut self) -> () {
         let first_pipe = self.pipes.first().unwrap();
 
         if (first_pipe.position.x + PIPE_WIDTH as f32) < 0.0 {
             self.pipes.remove(0);
-            println!("Removed pipe");
         }
+    }
+
+    fn draw_playing(&self, frame: &mut [u8]) -> () {
+        self.bird.draw(frame);
+
+        for pipe in &self.pipes {
+            pipe.draw(frame);
+        }
+
+        // Draw score last so that it draws over everything.
+        self.score.draw(frame);
+    }
+
+    fn draw_main_menu(&self, frame: &mut [u8]) -> () {
+        draw_string(
+            frame,
+            "want to play? (y/n)",
+            FONT_START_OFFSET,
+            FONT_START_OFFSET,
+        );
+    }
+
+    fn draw_dead(&self, frame: &mut [u8]) -> () {
+        let score_string = format!("you got a score of {}!", self.score.score);
+        draw_string(frame, &score_string, FONT_START_OFFSET, FONT_START_OFFSET);
+
+        let play_again_string = format!("play again? (y/n)");
+        draw_string(
+            frame,
+            &play_again_string,
+            FONT_START_OFFSET,
+            FONT_START_OFFSET + FONT_HEIGHT_PIXEL_MAP_PIXELS * FONT_PIXEL_SIZE_SCREEN_PIXELS,
+        );
     }
 }

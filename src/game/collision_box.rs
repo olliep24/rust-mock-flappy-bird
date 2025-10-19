@@ -11,9 +11,9 @@ impl CollisionBox {
     }
 
     pub fn collides_with(&self, other: &CollisionBox) -> bool {
-        self.max.x > other.min.x &&
-        self.min.x < other.max.x &&
-        self.max.y > other.min.y &&
-        self.min.y < other.max.y
+        self.max.x > other.min.x
+            && self.min.x < other.max.x
+            && self.max.y > other.min.y
+            && self.min.y < other.max.y
     }
 }

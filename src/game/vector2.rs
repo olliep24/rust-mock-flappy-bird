@@ -26,10 +26,20 @@ impl Vector2 {
 
 impl Add for Vector2 {
     type Output = Self;
-    fn add(self, rhs: Self) -> Self { Self { x: self.x + rhs.x, y: self.y + rhs.y } }
+    fn add(self, rhs: Self) -> Self {
+        Self {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+        }
+    }
 }
 
 impl Mul<f32> for Vector2 {
     type Output = Self;
-    fn mul(self, s: f32) -> Self { Self { x: self.x * s, y: self.y * s } }
+    fn mul(self, s: f32) -> Self {
+        Self {
+            x: self.x * s,
+            y: self.y * s,
+        }
+    }
 }

@@ -1,4 +1,8 @@
-use crate::config::{BIRD_FLY_SPEED, BIRD_GRAVITY_ACCELERATION_SCALE, BIRD_HEIGHT, BIRD_R_COLOR, BIRD_A_COLOR, BIRD_B_COLOR, BIRD_G_COLOR, BIRD_START_POSITION_X, BIRD_START_POSITION_Y, BIRD_WIDTH, WIDTH, PIPE_WIDTH};
+use crate::config::{
+    BIRD_A_COLOR, BIRD_B_COLOR, BIRD_FLY_SPEED, BIRD_G_COLOR, BIRD_GRAVITY_ACCELERATION_SCALE,
+    BIRD_HEIGHT, BIRD_R_COLOR, BIRD_START_POSITION_X, BIRD_START_POSITION_Y, BIRD_WIDTH,
+    PIPE_WIDTH, WIDTH,
+};
 use crate::game::collision_box::CollisionBox;
 use crate::game::pipe::Pipe;
 use crate::game::vector2::Vector2;
@@ -8,7 +12,7 @@ use crate::game::vector2::Vector2;
 pub struct Bird {
     pub position: Vector2,
     velocity: Vector2,
-    collision_box: CollisionBox
+    collision_box: CollisionBox,
 }
 
 impl Bird {
@@ -16,7 +20,7 @@ impl Bird {
         let min = Vector2::new(BIRD_START_POSITION_X as f32, BIRD_START_POSITION_Y as f32);
         let max = Vector2::new(
             (BIRD_START_POSITION_X + BIRD_WIDTH) as f32,
-            (BIRD_START_POSITION_Y + BIRD_HEIGHT) as f32
+            (BIRD_START_POSITION_Y + BIRD_HEIGHT) as f32,
         );
 
         Self {
@@ -44,12 +48,14 @@ impl Bird {
 
         let x_position = self.position.x as usize;
         let y_position = self.position.y as usize;
-        
+
         for x in x_position..x_position + BIRD_WIDTH as usize {
             for y in y_position..y_position + BIRD_HEIGHT as usize {
                 let idx = y * stride + x as usize * 4;
 
-                if idx > frame.len() { break; }
+                if idx > frame.len() {
+                    break;
+                }
 
                 frame[idx + 0] = BIRD_R_COLOR;
                 frame[idx + 1] = BIRD_G_COLOR;
@@ -66,7 +72,7 @@ impl Bird {
 
     /// Returns whether this bird collides with the given pipe.
     pub fn collides_with_pipe(&self, pipe: &Pipe) -> bool {
-        self.collision_box.collides_with(&pipe.upper_collision_box) ||
-        self.collision_box.collides_with(&pipe.lower_collision_box)
+        self.collision_box.collides_with(&pipe.upper_collision_box)
+            || self.collision_box.collides_with(&pipe.lower_collision_box)
     }
 }

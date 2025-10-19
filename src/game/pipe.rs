@@ -1,8 +1,11 @@
-use crate::config::{WIDTH, HEIGHT, PIPE_WIDTH, PIPE_SPEED, PIPE_A_COLOR, PIPE_B_COLOR, PIPE_G_COLOR, PIPE_R_COLOR, PIPE_GAP_SIZE, PIPE_GAP_BOUND};
-use rand::Rng;
-use rand_pcg::Pcg32;
+use crate::config::{
+    HEIGHT, PIPE_A_COLOR, PIPE_B_COLOR, PIPE_G_COLOR, PIPE_GAP_BOUND, PIPE_GAP_SIZE, PIPE_R_COLOR,
+    PIPE_SPEED, PIPE_WIDTH, WIDTH,
+};
 use crate::game::collision_box::CollisionBox;
 use crate::game::vector2::Vector2;
+use rand::Rng;
+use rand::rngs::ThreadRng;
 
 /// Struct for the pipe.
 /// A pipe's position represents the top left corner of them.
@@ -18,23 +21,15 @@ pub struct Pipe {
 
 impl Pipe {
     /// On creation, pipes are placed just past the right side of the screen.
-    pub fn new(rng: &mut Pcg32) -> Self {
-        let y_gap_location = rng.random_range(PIPE_GAP_BOUND..HEIGHT - PIPE_GAP_BOUND - PIPE_GAP_SIZE);
+    pub fn new(rng: &mut ThreadRng) -> Self {
+        let y_gap_location =
+            rng.random_range(PIPE_GAP_BOUND..HEIGHT - PIPE_GAP_BOUND - PIPE_GAP_SIZE);
 
         let min_upper = Vector2::new(WIDTH as f32, 0.0);
-        let max_upper = Vector2::new(
-            (WIDTH + PIPE_WIDTH) as f32,
-            y_gap_location as f32
-        );
+        let max_upper = Vector2::new((WIDTH + PIPE_WIDTH) as f32, y_gap_location as f32);
 
-        let min_lower = Vector2::new(
-            WIDTH as f32,
-            (y_gap_location + PIPE_GAP_SIZE) as f32
-        );
-        let max_lower = Vector2::new(
-            (WIDTH + PIPE_WIDTH) as f32,
-            HEIGHT as f32,
-        );
+        let min_lower = Vector2::new(WIDTH as f32, (y_gap_location + PIPE_GAP_SIZE) as f32);
+        let max_lower = Vector2::new((WIDTH + PIPE_WIDTH) as f32, HEIGHT as f32);
 
         Self {
             position: min_upper,
@@ -60,7 +55,7 @@ impl Pipe {
     pub fn draw(&self, frame: &mut [u8]) -> () {
         let stride = WIDTH as usize * 4;
         let x_position = self.position.x as i32;
-        
+
         for x in x_position..x_position + PIPE_WIDTH as i32 {
             // Don't draw out of bounds
             if x < 0 || x * 4 >= stride as i32 {
@@ -68,7 +63,9 @@ impl Pipe {
             }
 
             for y in 0..HEIGHT as usize {
-                if y > self.y_gap_location as usize && y < (self.y_gap_location + PIPE_GAP_SIZE) as usize {
+                if y > self.y_gap_location as usize
+                    && y < (self.y_gap_location + PIPE_GAP_SIZE) as usize
+                {
                     continue;
                 }
 
